@@ -6,33 +6,29 @@
 //
 
 import Foundation
-
-
-import Foundation
+import Combine
 
 class AccountsRepositoryImpl: AccountsRepository {
-    func getDefaultUserAccount() async throws -> Account {
-        do {
-            return try await LocalAccountDataProvider.getDefaultUserAccount()
-        } catch {
-            throw error
-        }
+    func getDefaultUserAccount() -> AnyPublisher<Account, Error> {
+        // Replace with your actual implementation for fetching the default user account
+        return Just(LocalAccountDataProvider.getDefaultUserAccount())
+            .setFailureType(to: Error.self)
+            .eraseToAnyPublisher()
     }
 
-    func getAllUserAccount() async throws -> [Account] {
-        do {
-            return try await LocalAccountDataProvider.allUserAccounts
-        } catch {
-            throw error
-        }
+    func getAllUserAccount() -> AnyPublisher<[Account], Error> {
+        // Replace with your actual implementation for fetching all user accounts
+        return Just(LocalAccountDataProvider.allUserAccounts)
+            .setFailureType(to: Error.self)
+            .eraseToAnyPublisher()
     }
 
-    func getContactAccountByUid(uid: Int) async throws -> Account {
-        do {
-            return try await LocalAccountDataProvider.getContactAccountByUid(accountId: uid)
-        } catch {
-            throw error
-        }
+    func getContactAccountByUid(uid: Int) -> AnyPublisher<Account, Error> {
+        // Replace with your actual implementation for fetching a contact account by uid
+        let account = LocalAccountDataProvider.getContactAccountByUid(accountId: uid)
+        return Just(account)
+            .setFailureType(to: Error.self)
+            .eraseToAnyPublisher()
     }
 }
 

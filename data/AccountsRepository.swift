@@ -6,9 +6,10 @@
 //
 
 import Foundation
+import Combine
 
 protocol AccountsRepository {
-    func getDefaultUserAccount() async throws -> Account
-    func getAllUserAccount() async throws -> [Account]
-    func getContactAccountByUid(uid: Int) async throws -> Account
+    func getDefaultUserAccount() -> AnyPublisher<Account, Error>
+    func getAllUserAccount() -> AnyPublisher<[Account], Error>
+    func getContactAccountByUid(uid: Int) -> AnyPublisher<Account, Error>
 }
