@@ -1,16 +1,20 @@
 import SwiftUI
 
 struct ContentView: View {
+    
+    // MARK: - Variables for HomeView
+    @StateObject var homeViewModel = HomeViewModel()
+    
     var body: some View {
         UITabBarWrapper([
             TabBarElement(tabBarElementItem: .init(title: "Home", systemImageName: "house.fill")) {
-                Text("First View")
+                HomeView(viewModel: homeViewModel)
             },
             TabBarElement(tabBarElementItem: .init(title: "Schedule", systemImageName: "calendar")) {
-                Text("Second View")
+                ComingSoon()
             },
             TabBarElement(tabBarElementItem: .init(title: "Care", systemImageName: "list.bullet.clipboard.fill")) {
-                Text("Third View")
+                ComingSoon()
             }
         ])
     }

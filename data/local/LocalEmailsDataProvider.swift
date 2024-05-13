@@ -11,7 +11,7 @@ struct LocalEmailsDataProvider {
     static let threads = [
         Email(
             id: 8,
-            sender: LocalAccountDataProvider.getContactAccountByUid(accountId: 13),
+            sender: LocalAccountDataProvider.getContactAccountByUid(accountId: 13)!,
             recipients: [LocalAccountDataProvider.getDefaultUserAccount()],
             subject: "Your update on Google Play Store is live!",
             body: """
@@ -32,7 +32,7 @@ struct LocalEmailsDataProvider {
     static let allEmails = [
         Email(
             id: 0,
-            sender: LocalAccountDataProvider.getContactAccountByUid(accountId: 9),
+            sender: LocalAccountDataProvider.getContactAccountByUid(accountId: 9)!,
             recipients: [LocalAccountDataProvider.getDefaultUserAccount()],
             subject: "Package shipped!",
             body: """

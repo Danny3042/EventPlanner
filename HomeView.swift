@@ -6,60 +6,36 @@
 //
 
 import SwiftUI
-import UIKit
-import MessageUI
 
-// MARK: - Mail View
+struct HomeView: View {
+    @ObservedObject var viewModel: HomeViewModel
 
-struct MailView: UIViewControllerRepresentable {
-    
-    // MARK: - Variables
-    
-    @Binding var result: Result<MFMailComposeResult, Error>?
-    
-    @Environment(\.presentationMode) var presentation
-    
-    // MARK: - Coordinator
-
-    class Coordinator: NSObject, MFMailComposeViewControllerDelegate {
-
-        @Binding var presentation: PresentationMode
-        @Binding var result: Result<MFMailComposeResult, Error>?
-
-        init(presentation: Binding<PresentationMode>, result: Binding<Result<MFMailComposeResult, Error>?>) {
-            _presentation = presentation
-            _result = result
-        }
-
-        func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {
-            defer {
-                $presentation.wrappedValue.dismiss()
+    var body: some View {
+        NavigationView {
+            List(viewModel.emails) { email in
+                NavigationLink(destination: EmailDetailView(email: email, viewModel: viewModel)) {
+                    Text(email.subject)
+                }
             }
-            guard error == nil else {
-                self.result = .failure(error!)
-                return
-            }
-            self.result = .success(result)
+            .navigationBarTitle("Emails")
         }
     }
+}
 
-    func makeCoordinator() -> Coordinator {
-        return Coordinator(presentation: presentation, result: $result)
-    }
-    
-    // MARK: - UIViewController
+struct EmailDetailView: View {
+    var email: Email
+    @ObservedObject var viewModel: HomeViewModel
 
-    func makeUIViewController(context: UIViewControllerRepresentableContext<MailView>) -> MFMailComposeViewController {
-        let vc = MFMailComposeViewController()
-        vc.mailComposeDelegate = context.coordinator
-        vc.setSubject(Config.reportBugSubject)
-        vc.setToRecipients([Config.contactEmail])
-        vc.navigationBar.prefersLargeTitles = true
-        return vc
-    }
-
-    func updateUIViewController(_ uiViewController: MFMailComposeViewController, context: UIViewControllerRepresentableContext<MailView>) {
-
+    var body: some View {
+        VStack {
+            Text(email.subject)
+            Text(email.body)
+            Button(action: {
+                viewModel.closeDetailScreen()
+            }) {
+                Text("Close")
+            }
+        }
     }
 }
 

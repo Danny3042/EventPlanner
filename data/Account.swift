@@ -6,16 +6,17 @@
 //
 
 import Foundation
+import SwiftUI
 
 struct Account {
     let id: Int
     let uid: Int
     let firstName: String
     let lastName: String
-    let avatar: Int
+    let avatar: Image
     var isCurrentAccount: Bool
     
-    init(id: Int, uid: Int, firstName: String, lastName: String, avatar: Int, isCurrentAccount: Bool = false) {
+    init(id: Int, uid: Int, firstName: String, lastName: String, avatar: Image, isCurrentAccount: Bool = false) {
         self.id = id
         self.uid = uid
         self.firstName = firstName

@@ -26,7 +26,7 @@ class AccountsRepositoryImpl: AccountsRepository {
     func getContactAccountByUid(uid: Int) -> AnyPublisher<Account, Error> {
         // Replace with your actual implementation for fetching a contact account by uid
         let account = LocalAccountDataProvider.getContactAccountByUid(accountId: uid)
-        return Just(account)
+        return Just(account!)
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }

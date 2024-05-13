@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Email {
+struct Email: Identifiable {
     let id: Int
     let sender: Account
     let recipients: [Account]
