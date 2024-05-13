@@ -10,13 +10,13 @@ import SwiftUI
 
 struct LocalAccountDataProvider {
     static let allUserAccounts: [Account] = [
-        Account(id: 1, uid: 1, firstName: "Fred", lastName: "Smith", avatar: Image("avatar_10"), isCurrentAccount: true),
-        Account(id: 2, uid: 2, firstName: "Bob", lastName: "Jones", avatar: Image("avatar_2")),
-        Account(id: 3, uid: 3, firstName: "John", lastName: "Doe", avatar: Image("avatar_9"))
+        Account(id: 1, uid: 0, firstName: "Fred", lastName: "Smith", avatar: Image("avatar_10"), isCurrentAccount: true),
+        Account(id: 2, uid: 0, firstName: "Bob", lastName: "Jones", avatar: Image("avatar_2")),
+        Account(id: 3, uid: 0, firstName: "John", lastName: "Doe", avatar: Image("avatar_9"))
     ]
     
     static let allUserContactAccounts: [Account] = [
-        Account(id: 4, uid: 1, firstName: "Tracy", lastName: "Alvarez", avatar: Image("avatar_1")),
+        Account(id: 4, uid: 1, firstName: "Tracy", lastName: "Alvarez", avatar: Image("avatar_1"))
         // add other contacts here
     ]
     
