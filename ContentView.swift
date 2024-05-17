@@ -11,7 +11,7 @@ struct ContentView: View {
                 HomeView(viewModel: homeViewModel)
             },
             TabBarElement(tabBarElementItem: .init(title: "Schedule", systemImageName: "calendar")) {
-                ComingSoon()
+                ScheduleView()
             },
             TabBarElement(tabBarElementItem: .init(title: "Care", systemImageName: "list.bullet.clipboard.fill")) {
                 ComingSoon()
