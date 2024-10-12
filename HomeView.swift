@@ -8,35 +8,40 @@
 import SwiftUI
 
 struct HomeView: View {
-    @ObservedObject var viewModel: HomeViewModel
+    var moodEntries: [MoodEntry]
+    var recommendations: [Recommendation]
 
     var body: some View {
-        NavigationView {
-            List(viewModel.emails) { email in
-                NavigationLink(destination: EmailDetailView(email: email, viewModel: viewModel)) {
-                    Text(email.subject)
+        ScrollView {
+            VStack(alignment:.leading, spacing: 20) {
+                
+                // section for Mood Entries
+                Text("Recent Mood Entries")
+                    .font(.headline)
+                    .padding(.horizontal)
+                
+                // Display mood entries in card view
+                ForEach(moodEntries) { entry in
+                    MoodCardView(moodEntry: entry)
+                        .padding(.horizontal)
+                }
+                
+                //section for recommendation
+                Text("Today's Recommendations")
+                    .font(.headline)
+                    .padding(.horizontal)
+                
+                // display recommendations in card view
+                ForEach(recommendations) { recommendation in
+                    RecommendationCardView(recommendation: recommendation)
+                        .padding(.horizontal)
                 }
             }
-            .navigationBarTitle("Emails")
+            .padding(.top)
         }
     }
 }
 
-struct EmailDetailView: View {
-    var email: Email
-    @ObservedObject var viewModel: HomeViewModel
 
-    var body: some View {
-        VStack {
-            Text(email.subject)
-            Text(email.body)
-            Button(action: {
-                viewModel.closeDetailScreen()
-            }) {
-                Text("Close")
-            }
-        }
-    }
-}
 
 

@@ -8,7 +8,7 @@ struct ContentView: View {
     var body: some View {
         UITabBarWrapper([
             TabBarElement(tabBarElementItem: .init(title: "Home", systemImageName: "house.fill")) {
-                HomeView(viewModel: homeViewModel)
+                HomeView(moodEntries: homeViewModel.moodEntries, recommendations: homeViewModel.recommendations)
             },
             TabBarElement(tabBarElementItem: .init(title: "Schedule", systemImageName: "calendar")) {
                 ScheduleView()
