@@ -1,142 +1,161 @@
-//
-//  ScheduleView.swift
-//  EventPlanner
-//
-//  Created by Daniel Ramzani on 17/05/2024.
-//
 import SwiftUI
 
+// Main Schedule View
 struct ScheduleView: View {
     @State private var selectedDate: Date = Date() // Default to today's date
-    @State private var moodRating: Double = 5.0
-    @State private var sleepRating: Double = 7.0
-    @State private var isShowingMoodInput = false
+    @State private var selectedEntry: DayEntry? // Currently selected entry
+    @State private var weekEntries: [DayEntry] = [] // Entries for each day
     
-    // This will generate dates for the current week
-    var currentWeekDates: [Date] {
+    @State private var showMoodInputModal: Bool = false // To trigger modal presentation
+
+    var body: some View {
+        ZStack {
+            VStack {
+                // Week view
+                weekCalendarView(selectedDate: $selectedDate, onDateSelected: selectOrCreateEntry)
+                
+                if let selectedEntry = selectedEntry {
+                    MoodEntryCard(entry: selectedEntry)
+                        .padding()
+                }
+
+                Spacer()
+            }
+            .onAppear {
+                // Initialize entries for the current week if not done already
+                let currentWeekDates = getWeek()
+                for date in currentWeekDates {
+                    if !weekEntries.contains(where: { Calendar.current.isDate($0.date, inSameDayAs: date) }) {
+                        weekEntries.append(DayEntry(date: date, moodRating: .neutral)) // Default mood rating
+                    }
+                }
+                selectOrCreateEntry(for: selectedDate)
+            }
+            
+            // Floating Action Button
+            VStack {
+                Spacer() // align the button to the bottom
+                HStack {
+                    Spacer() // align the button to the right
+                    
+                    // FAB Button
+                    Button(action: {
+                        showMoodInputModal.toggle()
+                    }) {
+                        Image(systemName: "plus")
+                            .font(.system(size: 24))
+                            .frame(width: 60, height: 60)
+                            .foregroundColor(.white)
+                            .background(Color.purple)
+                            .clipShape(Circle())
+                            .shadow(radius: 5)
+                    }
+                    .padding(.bottom, 20) // Adjust bottom padding for spacing
+                    .padding(.trailing, 20) // Adjust right padding for spacing
+                }
+            }
+        }
+        // Modal view
+        .sheet(isPresented: $showMoodInputModal) {
+            MoodInputModalView(dayEntry: selectedEntry ?? DayEntry(date: Date(), moodRating: .neutral), onSave: saveMoodEntry, onCancel: {
+                           showMoodInputModal = false
+                       })
+        }
+    }
+    
+    // Helper function to select or create an entry for a day
+    private func selectOrCreateEntry(for date: Date) {
+        if let entry = weekEntries.first(where: { Calendar.current.isDate($0.date, inSameDayAs: date) }) {
+            selectedEntry = entry
+        } else {
+            let newEntry = DayEntry(date: date, moodRating: .neutral)
+            weekEntries.append(newEntry)
+            selectedEntry = newEntry
+        }
+    }
+    
+    // Function to save the mood entry from the modal
+    private func saveMoodEntry(entry: DayEntry) {
+        if let index = weekEntries.firstIndex(where: { Calendar.current.isDate($0.date, inSameDayAs: entry.date) }) {
+            weekEntries[index] = entry
+        } else {
+            weekEntries.append(entry)
+        }
+        showMoodInputModal = false
+    }
+
+    // Helper function to get the week dates (Sunday to Saturday)
+    func getWeek() -> [Date] {
         let calendar = Calendar.current
         let today = Date()
-        let startOfWeek = calendar.dateInterval(of: .weekOfMonth, for: today)?.start ?? today
         
+        // Find the start of the week (assuming Sunday is the first day of the week)
+        let components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: today)
+        let startOfWeek = calendar.date(from: components) ?? today
+
+        // Generate the 7 days of the current week
         return (0..<7).compactMap { dayOffset in
             calendar.date(byAdding: .day, value: dayOffset, to: startOfWeek)
         }
     }
     
-    let instructions = """
-        1. Swipe left or right on a rating card to delete it.
-        2. Click on a date to view or add ratings.
-        3. Click on the floating action button to add a new rating.
-    """
-    
-    var body: some View {
-        VStack(spacing: 20) {
+    // Calendar view displaying the week
+    private func weekCalendarView(selectedDate: Binding<Date>, onDateSelected: @escaping (Date) -> Void) -> some View {
+        let dates = getWeek()
+        let calendar = Calendar.current
+        
+        return VStack {
+            Text(getMonth(date: Date()))
+                .font(.title)
+                .padding(.bottom, 10)
             
-            // Navigation Instructions
-            Text("Navigation Instructions")
-                .font(.headline)
-                .padding()
-                .frame(maxWidth: .infinity)
-                .background(Color.purple.opacity(0.8))
-                .foregroundColor(.white)
-                .cornerRadius(10)
-                .padding(.horizontal)
-            
-            Text(instructions)
-                .font(.caption)
-                .padding()
-                .frame(maxWidth: .infinity)
-                .background(Color.purple.opacity(0.3))
-                .cornerRadius(10)
-                .padding(.horizontal)
-            
-            // Today's Date and Weekly Selector
-            Text("Today")
-                .font(.headline)
-                .padding(.leading, 20)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            
-            // Horizontal Days
-            GeometryReader { geometry in
-                HStack(spacing: 5) {
-                    ForEach(currentWeekDates, id: \.self) { date in
-                        DayView(date: date)
-                            .onTapGesture {
-                                // Select the day
-                                selectedDate = date
-                            }
-                            .background(Calendar.current.isDate(selectedDate, inSameDayAs: date) ? Color.purple.opacity(0.5) : Color.gray.opacity(0.3)) // Highlight selected day
-                            .cornerRadius(10)
+            ScrollView(.horizontal) {
+               HStack {
+                    ForEach(dates, id: \.self) { day in
+                        VStack {
+                            Text(getDayShort(date: day))
+                                .font(.body)
+                            Text("\(getDayNumber(date: day))")
+                                .font(.body)
+                        }
+                        .frame(width: 45, height: 45)
+                        .background(calendar.isDate(selectedDate.wrappedValue, inSameDayAs: day) ? Color.purple.opacity(0.5) : Color.gray.opacity(0.3))
+                        .cornerRadius(10)
+                        .onTapGesture {
+                            selectedDate.wrappedValue = day
+                            onDateSelected(day)
+                        }
                     }
                 }
-                .frame(maxWidth: .infinity) // Make sure it fits within the screen
             }
-            .frame(height: 70) // Fix height for the day row
-            
-            // Rating Card for Mood and Sleep
-            VStack(alignment: .leading, spacing: 10) {
-                Text("Sleep Rating: \(sleepRating, specifier: "%.1f")")
-                Text("Mood Rating: \(moodRating, specifier: "%.1f")")
-            }
-            .padding()
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.purple.opacity(0.1))
-            .cornerRadius(10)
             .padding(.horizontal)
-            
-            Spacer()
-            
-            // Floating Action Button
-            Button(action: {
-                // Show the mood input modal
-                isShowingMoodInput = true
-            }) {
-                Image(systemName: "plus")
-                    .foregroundColor(.white)
-                    .frame(width: 60, height: 60)
-                    .background(Color.purple)
-                    .cornerRadius(30)
-                    .shadow(radius: 5)
-            }
-            .padding(.bottom, 20)
-            .sheet(isPresented: $isShowingMoodInput) {
-                MoodInputView(moodRating: $moodRating, sleepRating: $sleepRating) // Modal for mood input
-            }
         }
     }
-}
-
-// Subview for each day
-struct DayView: View {
-    let date: Date
     
-    var body: some View {
-        VStack {
-            // Display first 3 letters of the day (e.g., "Mon", "Tue")
-            Text(dateFormatted(date: date, format: "EEE"))
-                .font(.headline)
-                .foregroundColor(.white)
-            
-            // Display numeric day (e.g., "10", "11")
-            Text(dateFormatted(date: date, format: "d"))
-                .font(.caption)
-                .foregroundColor(.gray)
-        }
-        .padding(10)
-        .aspectRatio(1.0, contentMode: .fit) // Maintain a square aspect ratio
-        .background(Color.purple.opacity(0.6))
-        .cornerRadius(10)
+    private func getMonth(date: Date) -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "LLLL"
+        return dateFormatter.string(from: date)
     }
-    
-    // Helper function to format date
-    func dateFormatted(date: Date, format: String) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = format
-        return formatter.string(from: date)
+
+    private func getDayShort(date: Date) -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "E"
+        return dateFormatter.string(from: date)
+    }
+
+    private func getDayNumber(date: Date) -> Int {
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.day], from: date)
+        return components.day ?? 0
     }
 }
 
 
-#Preview {
-    ScheduleView()
-}
+
+
+
+
+
+
+

@@ -7,27 +7,50 @@
 
 import SwiftUI
 
-class MoodInputViewModel: ObservableObject {
-    @Published var weekEntries: [MoodEntry] = []
+struct MoodInputModalView: View {
+    @State var dayEntry: DayEntry
+    var onSave: (DayEntry) -> Void
+    var onCancel: () -> Void
     
-    init() {
-        generateWeekEntries()
-    }
-    
-    func generateWeekEntries() {
-        let calendar = Calendar.current
-        let today = Date()
-        let startofWeek = calendar.dateInterval(of: .weekOfMonth, for: today)?.start ?? today
-        
-        weekEntries = (0..<7).map { dayOffset in
-            let day = calendar.date(byAdding: .day, value: dayOffset, to: startofWeek) ?? today
-            return MoodEntry(date: day, mood: "")
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 20) {
+                Text("Mood for \(formattedDate(for: dayEntry.date))")
+                    .font(.title2)
+                
+                Picker("Mood Rating", selection: $dayEntry.moodRating) {
+                    ForEach(MoodRating.allCases) { mood in
+                        Text(mood.description).tag(mood)
+                    }
+                }
+                .pickerStyle(SegmentedPickerStyle())
+
+                Spacer()
+
+                HStack {
+                    Button(action: onCancel) {
+                        Text("Cancel")
+                            .foregroundColor(.red)
+                    }
+                    Spacer()
+                    Button(action: {
+                        onSave(dayEntry)
+                    }) {
+                        Text("Save")
+                            .bold()
+                    }
+                }
+                .padding(.horizontal)
+            }
+            .padding()
+            .navigationTitle("Mood Entry")
+            .navigationBarTitleDisplayMode(.inline)
         }
     }
     
-    func updateMood(for day: Date, mood: String) {
-        if let index = weekEntries.firstIndex(where: {$0.date == day }) {
-            weekEntries[index].mood = mood
-        }
+    private func formattedDate(for date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        return formatter.string(from: date)
     }
 }
