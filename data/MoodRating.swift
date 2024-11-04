@@ -5,7 +5,7 @@
 //  Created by Daniel Ramzani on 13/10/2024.
 //
 
-enum MoodRating: String, CaseIterable, Identifiable {
+enum MoodRating: String, CaseIterable, Identifiable, Codable {
     case happy = "Happy"
     case neutral = "Neutral"
     case sad = "Sad"

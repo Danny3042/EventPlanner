@@ -1,19 +1,21 @@
 import SwiftUI
+import SwiftData
 
 // Main Schedule View
 struct ScheduleView: View {
-    @State private var selectedDate: Date = Date() // Default to today's date
-    @State private var selectedEntry: DayEntry? // Currently selected entry
-    @State private var weekEntries: [DayEntry] = [] // Entries for each day
-    
-    @State private var showMoodInputModal: Bool = false // To trigger modal presentation
+    @Environment(\.modelContext) private var modelContext
+    @Query(sort: \DayEntry.date, order: .forward) private var weekEntries: [DayEntry]
+
+    @State private var selectedDate: Date = Date()
+    @State private var selectedEntry: DayEntry?
+    @State private var showMoodInputModal: Bool = false
 
     var body: some View {
         ZStack {
             VStack {
                 // Week view
                 weekCalendarView(selectedDate: $selectedDate, onDateSelected: selectOrCreateEntry)
-                
+
                 if let selectedEntry = selectedEntry {
                     MoodEntryCard(entry: selectedEntry)
                         .padding()
@@ -26,7 +28,9 @@ struct ScheduleView: View {
                 let currentWeekDates = getWeek()
                 for date in currentWeekDates {
                     if !weekEntries.contains(where: { Calendar.current.isDate($0.date, inSameDayAs: date) }) {
-                        weekEntries.append(DayEntry(date: date, moodRating: .neutral)) // Default mood rating
+                        // Create and insert a new entry into the model context
+                        let newEntry = DayEntry(date: date, moodRating: .neutral) // Default mood rating
+                        modelContext.insert(newEntry) // Use the model context to insert the new entry
                     }
                 }
                 selectOrCreateEntry(for: selectedDate)
@@ -34,9 +38,9 @@ struct ScheduleView: View {
             
             // Floating Action Button
             VStack {
-                Spacer() // align the button to the bottom
+                Spacer() // Align the button to the bottom
                 HStack {
-                    Spacer() // align the button to the right
+                    Spacer() // Align the button to the right
                     
                     // FAB Button
                     Button(action: {
@@ -58,8 +62,8 @@ struct ScheduleView: View {
         // Modal view
         .sheet(isPresented: $showMoodInputModal) {
             MoodInputModalView(dayEntry: selectedEntry ?? DayEntry(date: Date(), moodRating: .neutral), onSave: saveMoodEntry, onCancel: {
-                           showMoodInputModal = false
-                       })
+                showMoodInputModal = false
+            })
         }
     }
     
@@ -68,18 +72,23 @@ struct ScheduleView: View {
         if let entry = weekEntries.first(where: { Calendar.current.isDate($0.date, inSameDayAs: date) }) {
             selectedEntry = entry
         } else {
+            // If entry does not exist, create a new one and select it
             let newEntry = DayEntry(date: date, moodRating: .neutral)
-            weekEntries.append(newEntry)
+            modelContext.insert(newEntry) // Insert into the model context
             selectedEntry = newEntry
         }
     }
     
     // Function to save the mood entry from the modal
     private func saveMoodEntry(entry: DayEntry) {
+        // Use model context to save updates to existing entries
         if let index = weekEntries.firstIndex(where: { Calendar.current.isDate($0.date, inSameDayAs: entry.date) }) {
-            weekEntries[index] = entry
+            // Update the existing entry in the model context
+            let existingEntry = weekEntries[index]
+            existingEntry.moodRating = entry.moodRating // Assuming moodRating is a mutable property
         } else {
-            weekEntries.append(entry)
+            // If the entry is new, insert it
+            modelContext.insert(entry)
         }
         showMoodInputModal = false
     }
@@ -110,7 +119,7 @@ struct ScheduleView: View {
                 .padding(.bottom, 10)
             
             ScrollView(.horizontal) {
-               HStack {
+                HStack {
                     ForEach(dates, id: \.self) { day in
                         VStack {
                             Text(getDayShort(date: day))
@@ -150,12 +159,4 @@ struct ScheduleView: View {
         return components.day ?? 0
     }
 }
-
-
-
-
-
-
-
-
 

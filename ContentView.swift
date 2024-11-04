@@ -13,8 +13,8 @@ struct ContentView: View {
             TabBarElement(tabBarElementItem: .init(title: "Schedule", systemImageName: "calendar")) {
                 ScheduleView()
             },
-            TabBarElement(tabBarElementItem: .init(title: "Care", systemImageName: "list.bullet.clipboard.fill")) {
-                ComingSoon()
+            TabBarElement(tabBarElementItem: .init(title: "Insights", systemImageName: "waveform.path.ecg.rectangle.fill")) {
+                InsightsView()
             }
         ])
     }
