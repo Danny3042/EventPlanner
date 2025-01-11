@@ -11,60 +11,63 @@ struct ScheduleView: View {
     @State private var showMoodInputModal: Bool = false
 
     var body: some View {
-        ZStack {
-            VStack {
-                // Week view
-                weekCalendarView(selectedDate: $selectedDate, onDateSelected: selectOrCreateEntry)
-
-                if let selectedEntry = selectedEntry {
-                    MoodEntryCard(entry: selectedEntry)
-                        .padding()
-                }
-
-                Spacer()
-            }
-            .onAppear {
-                // Initialize entries for the current week if not done already
-                let currentWeekDates = getWeek()
-                for date in currentWeekDates {
-                    if !weekEntries.contains(where: { Calendar.current.isDate($0.date, inSameDayAs: date) }) {
-                        // Create and insert a new entry into the model context
-                        let newEntry = DayEntry(date: date, moodRating: .neutral) // Default mood rating
-                        modelContext.insert(newEntry) // Use the model context to insert the new entry
-                    }
-                }
-                selectOrCreateEntry(for: selectedDate)
-            }
-            
-            // Floating Action Button
-            VStack {
-                Spacer() // Align the button to the bottom
-                HStack {
-                    Spacer() // Align the button to the right
+        NavigationView {
+            ZStack {
+                VStack {
+                    // Week view
+                    weekCalendarView(selectedDate: $selectedDate, onDateSelected: selectOrCreateEntry)
                     
-                    // FAB Button
-                    Button(action: {
-                        showMoodInputModal.toggle()
-                    }) {
-                        Image(systemName: "plus")
-                            .font(.system(size: 24))
-                            .frame(width: 60, height: 60)
-                            .foregroundColor(.white)
-                            .background(Color.purple)
-                            .clipShape(Circle())
-                            .shadow(radius: 5)
+                    if let selectedEntry = selectedEntry {
+                        MoodEntryCard(entry: selectedEntry)
+                            .padding()
                     }
-                    .padding(.bottom, 20) // Adjust bottom padding for spacing
-                    .padding(.trailing, 20) // Adjust right padding for spacing
+                    
+                    Spacer()
+                }
+                .onAppear {
+                    // Initialize entries for the current week if not done already
+                    let currentWeekDates = getWeek()
+                    for date in currentWeekDates {
+                        if !weekEntries.contains(where: { Calendar.current.isDate($0.date, inSameDayAs: date) }) {
+                            // Create and insert a new entry into the model context
+                            let newEntry = DayEntry(date: date, moodRating: .neutral) // Default mood rating
+                            modelContext.insert(newEntry) // Use the model context to insert the new entry
+                        }
+                    }
+                    selectOrCreateEntry(for: selectedDate)
+                }
+                
+                // Floating Action Button
+                VStack {
+                    Spacer() // Align the button to the bottom
+                    HStack {
+                        Spacer() // Align the button to the right
+                        
+                        // FAB Button
+                        Button(action: {
+                            showMoodInputModal.toggle()
+                        }) {
+                            Image(systemName: "plus")
+                                .font(.system(size: 24))
+                                .frame(width: 60, height: 60)
+                                .foregroundColor(.white)
+                                .background(Color.purple)
+                                .clipShape(Circle())
+                                .shadow(radius: 5)
+                        }
+                        .padding(.bottom, 20) // Adjust bottom padding for spacing
+                        .padding(.trailing, 20) // Adjust right padding for spacing
+                    }
                 }
             }
+            // Modal view
+            .sheet(isPresented: $showMoodInputModal) {
+                MoodInputModalView(dayEntry: selectedEntry ?? DayEntry(date: Date(), moodRating: .neutral), onSave: saveMoodEntry, onCancel: {
+                    showMoodInputModal = false
+                })
+            }
         }
-        // Modal view
-        .sheet(isPresented: $showMoodInputModal) {
-            MoodInputModalView(dayEntry: selectedEntry ?? DayEntry(date: Date(), moodRating: .neutral), onSave: saveMoodEntry, onCancel: {
-                showMoodInputModal = false
-            })
-        }
+        .navigationTitle("Schedule")
     }
     
     // Helper function to select or create an entry for a day

@@ -6,19 +6,22 @@ struct InsightsView: View {
     @Query(sort: \DayEntry.date, order: .forward) private var moodEntries: [DayEntry] // Fetch all entries
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 20) {
-                ChartCardView(title: "Mood Trend") {
-                    moodTrendChart
+        NavigationView() {
+            ScrollView {
+                VStack(spacing: 20) {
+                    ChartCardView(title: "Mood Trend") {
+                        moodTrendChart
+                    }
+                    
+                    ChartCardView(title: "Mood Distribution") {
+                        moodDistributionChart
+                    }
                 }
-                
-                ChartCardView(title: "Mood Distribution") {
-                    moodDistributionChart
-                }
+                .padding()
+                .navigationTitle("Insights")
             }
-            .padding()
-            .navigationTitle("Insights")
         }
+        .navigationTitle("Insights")
     }
 
     private var moodTrendChart: some View {

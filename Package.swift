@@ -8,19 +8,19 @@ import PackageDescription
 import AppleProductTypes
 
 let package = Package(
-    name: "EventPlanner",
+    name: "MediApp",
     platforms: [
         .iOS("17.0")
     ],
     products: [
         .iOSApplication(
-            name: "EventPlanner",
+            name: "MediApp",
             targets: ["AppModule"],
             bundleIdentifier: "com.danielramzani.EventPlanner",
             displayVersion: "1.0",
             bundleVersion: "1",
-            appIcon: .placeholder(icon: .cat),
-            accentColor: .presetColor(.orange),
+            appIcon: .placeholder(icon: .flower),
+            accentColor: .presetColor(.cyan),
             supportedDeviceFamilies: [
                 .pad,
                 .phone

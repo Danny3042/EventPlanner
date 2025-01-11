@@ -2,7 +2,6 @@ import UIKit
 import ARKit
 import SceneKit
 import SwiftUI
-import ARKit
 
 
 class ARViewController: UIViewController, ARSCNViewDelegate {
