@@ -21,7 +21,7 @@ struct MoodCardView: View {
                 .foregroundColor(.gray)
         }
         .padding()
-        .background(Color.blue.opacity(0.2))
+        .background()
         .cornerRadius(10)
         .shadow(radius: 5)
     }

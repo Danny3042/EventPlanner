@@ -13,31 +13,25 @@ struct HomeView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment:.leading, spacing: 20) {
-                
-                // section for Mood Entries
-                Text("Recent Mood Entries")
-                    .font(.headline)
-                    .padding(.horizontal)
-                
-                // Display mood entries in card view
-                ForEach(moodEntries) { entry in
-                    MoodCardView(moodEntry: entry)
-                        .padding(.horizontal)
-                }
-                
-                //section for recommendation
-                Text("Today's Recommendations")
-                    .font(.headline)
-                    .padding(.horizontal)
-                
-                // display recommendations in card view
-                ForEach(recommendations) { recommendation in
-                    RecommendationCardView(recommendation: recommendation)
-                        .padding(.horizontal)
+            NavigationView {
+                VStack(alignment:.leading, spacing: 20) {
+                    
+                    Text("Welcome to Mindfulness App")
+                        .font(.title)
+                        .padding()
+                    
+                    NavigationLink(destination: ARViewRepresentable()) {
+                        Text("Tap here to access AR")
+                            .font(.headline)
+                            .padding()
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
+                    .navigationTitle("Home")
+                    .padding(.top)
                 }
             }
-            .padding(.top)
         }
     }
 }
