@@ -6,12 +6,13 @@ import SwiftUI
 
 class ARViewController: UIViewController, ARSCNViewDelegate {
     
+    // MARK: - Properties
     var sceneView: ARSCNView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // Initialize ARSCNView and set it up
+        // Set up the ARSCNView
         setupARView()
         
         // Configure AR session
@@ -19,11 +20,14 @@ class ARViewController: UIViewController, ARSCNViewDelegate {
         configuration.planeDetection = [.horizontal, .vertical]
         sceneView.session.run(configuration)
         
-        // Add 3D object to the AR scene
-        add3DObject()
+        // Add tap gesture recognizer for popping bubbles
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap(_:)))
+        sceneView.addGestureRecognizer(tapGesture)
+        
+        // Start adding bubbles
+        addRandomBubbles()
     }
     
-    // Set up ARSCNView
     func setupARView() {
         sceneView = ARSCNView(frame: view.bounds)
         sceneView.delegate = self
@@ -31,18 +35,50 @@ class ARViewController: UIViewController, ARSCNViewDelegate {
         view.addSubview(sceneView)
     }
     
-    // Add 3D object (sphere)
-    func add3DObject() {
-        let sphere = SCNSphere(radius: 0.1)
-        sphere.firstMaterial?.diffuse.contents = UIColor.systemBlue
-        
-        let sphereNode = SCNNode(geometry: sphere)
-        sphereNode.position = SCNVector3(0, 0, -0.5)
-        
-        sceneView.scene.rootNode.addChildNode(sphereNode)
+    // MARK: - Bubble Management
+    func addRandomBubbles() {
+        for _ in 0..<10 { // Add 10 bubbles
+            let bubble = SCNSphere(radius: 0.05) // 5 cm radius
+            bubble.firstMaterial?.diffuse.contents = UIColor.random() // Random bubble color
+            
+            let bubbleNode = SCNNode(geometry: bubble)
+            
+            // Random position near the user
+            let x = Float.random(in: -0.5 ... 0.5) // Random x position
+            let y = Float.random(in: -0.5 ... 0.5) // Random y position
+            let z = Float.random(in: -1.0 ... -0.5) // Random z position (further away)
+            bubbleNode.position = SCNVector3(x, y, z)
+            
+            sceneView.scene.rootNode.addChildNode(bubbleNode)
+        }
     }
     
-    // ARSCNViewDelegate methods
+    @objc func handleTap(_ gesture: UITapGestureRecognizer) {
+        // Get tap location in the scene
+        let location = gesture.location(in: sceneView)
+        
+        // Perform a hit test to find tapped nodes
+        let hitResults = sceneView.hitTest(location, options: nil)
+        
+        if let hitNode = hitResults.first?.node {
+            // Remove the tapped node
+            hitNode.removeFromParentNode()
+            
+            // Optional: Play a sound or show an animation
+            playPopSound()
+        }
+    }
+    
+    func playPopSound() {
+        // Play a "pop" sound
+        let popSound = SCNAudioSource(fileNamed: "pop.mp3")
+        popSound?.load()
+        
+        let audioPlayer = SCNAudioPlayer(source: popSound!)
+        sceneView.scene.rootNode.addAudioPlayer(audioPlayer)
+    }
+    
+    // MARK: - ARSCNViewDelegate Methods
     func session(_ session: ARSession, didFailWithError error: Error) {
         print("AR Session Failed: \(error.localizedDescription)")
     }
@@ -56,6 +92,17 @@ class ARViewController: UIViewController, ARSCNViewDelegate {
     }
 }
 
+// Extension for random bubble colors
+extension UIColor {
+    static func random() -> UIColor {
+        return UIColor(
+            red: CGFloat.random(in: 0...1),
+            green: CGFloat.random(in: 0...1),
+            blue: CGFloat.random(in: 0...1),
+            alpha: 1.0
+        )
+    }
+}
 
 struct ARViewRepresentable: UIViewControllerRepresentable {
     
