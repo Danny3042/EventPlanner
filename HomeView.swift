@@ -1,10 +1,3 @@
-//
-//  HomeView.swift
-//  EventPlanner
-//
-//  Created by Daniel Ramzani on 12/05/2024.
-//
-
 import SwiftUI
 
 struct HomeView: View {
@@ -12,30 +5,29 @@ struct HomeView: View {
     var recommendations: [Recommendation]
 
     var body: some View {
-        ScrollView {
-            NavigationView {
-                VStack(alignment:.leading, spacing: 20) {
+        NavigationStack {  // Move NavigationStack outside
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
                     
                     Text("Welcome to Mindfulness App")
                         .font(.title)
                         .padding()
-                    
-                    NavigationLink(destination: ARViewRepresentable()) {
+
+                    NavigationLink(destination: ARViewRepresentable(isFullScreen: .constant(true))) {
                         Text("Tap here to access AR")
                             .font(.headline)
                             .padding()
+                            .frame(maxWidth: .infinity)
                             .background(Color.blue)
                             .foregroundColor(.white)
                             .cornerRadius(10)
                     }
-                    .navigationTitle("Home")
-                    .padding(.top)
+                    .padding(.horizontal)
+
                 }
+                .padding()
             }
+            .navigationTitle("Home") // Title stays in NavigationStack
         }
     }
 }
-
-
-
-

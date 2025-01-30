@@ -6,7 +6,7 @@ struct InsightsView: View {
     @Query(sort: \DayEntry.date, order: .forward) private var moodEntries: [DayEntry] // Fetch all entries
 
     var body: some View {
-        NavigationView() {
+        NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
                     ChartCardView(title: "Mood Trend") {
@@ -18,10 +18,9 @@ struct InsightsView: View {
                     }
                 }
                 .padding()
-                .navigationTitle("Insights")
+                .navigationTitle("Insights") // Set the navigation title within NavigationStack
             }
         }
-        .navigationTitle("Insights")
     }
 
     private var moodTrendChart: some View {
@@ -81,4 +80,3 @@ struct ChartCardView<Content: View>: View {
         .shadow(radius: 5)
     }
 }
-

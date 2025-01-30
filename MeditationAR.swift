@@ -106,6 +106,8 @@ extension UIColor {
 
 struct ARViewRepresentable: UIViewControllerRepresentable {
     
+    @Binding var isFullScreen: Bool
+    
     // Create the ARViewController instance
     func makeUIViewController(context: Context) -> ARViewController {
         return ARViewController()
@@ -113,6 +115,56 @@ struct ARViewRepresentable: UIViewControllerRepresentable {
 
     // Update the UIViewController (currently not needed)
     func updateUIViewController(_ uiViewController: ARViewController, context: Context) {
-        // You can update the ARViewController if needed in future
+        if isFullScreen {
+            uiViewController.sceneView.frame = UIScreen.main.bounds
+        }
+    }
+}
+
+//MARK: SwiftUI AR Experience view
+
+struct ARExperienceView: View {
+    @State private var isFullScreen = false
+    @Environment(\.presentationMode) var presentationMode
+    
+    var body : some View {
+        ZStack {
+            ARViewRepresentable(isFullScreen: $isFullScreen)
+                .edgesIgnoringSafeArea(isFullScreen ? .all : .bottom )
+            VStack{
+                HStack {
+                    Button(action: {
+                        isFullScreen.toggle()
+                    }) {
+                        Image(systemName: isFullScreen ? "arrow.down.right.and.arrow.up.left" : "arrow.up.left.and.arrow.down.right")
+                            .resizable()
+                            .frame(width: 30, height: 30)
+                            .padding()
+                            .background(Color.white.opacity(0.7))
+                            .clipShape(Circle())
+                    }
+                    .padding(.leading, 20)
+                    
+                    Spacer()
+                    
+                    // Button to close experience
+                    Button(action: {
+                        presentationMode.wrappedValue.dismiss()
+                    }){
+                        Image(systemName: "xmark.circle.fill")
+                            .resizable()
+                            .frame(width: 30, height: 30)
+                            .padding()
+                            .background(Color.white.opacity(0.7))
+                            .clipShape(Circle())
+                    }
+                    .padding(.trailing, 20)
+                }
+                .padding(.top, 50)
+                
+                Spacer()
+            }
+        }
+
     }
 }

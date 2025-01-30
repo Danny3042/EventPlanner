@@ -4,7 +4,6 @@
 //
 //  Created by Daniel Ramzani on 13/10/2024.
 //
-
 import SwiftUI
 
 struct MoodInputModalView: View {
@@ -18,9 +17,15 @@ struct MoodInputModalView: View {
                 Text("Mood for \(formattedDate(for: dayEntry.date))")
                     .font(.title2)
                 
+                // Show the selected mood emoji
+                Text(dayEntry.moodRating.emoji)
+                    .font(.system(size: 80)) // Large emoji
+                    .padding(.bottom, 10)
+
+                // Mood Picker with emojis in options
                 Picker("Mood Rating", selection: $dayEntry.moodRating) {
                     ForEach(MoodRating.allCases) { mood in
-                        Text(mood.description).tag(mood)
+                        Text(mood.emoji + " " + mood.description).tag(mood)
                     }
                 }
                 .pickerStyle(SegmentedPickerStyle())

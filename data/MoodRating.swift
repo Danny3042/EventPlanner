@@ -12,6 +12,14 @@ enum MoodRating: String, CaseIterable, Identifiable, Codable {
     
     var id: String { self.rawValue }
     
+    var emoji: String {
+        switch self {
+        case .happy: return "😄"
+        case .neutral: return "😐"
+        case .sad : return "😔"
+        }
+    }
+    
     var description: String {
         switch self {
         case .happy: return "Happy"
