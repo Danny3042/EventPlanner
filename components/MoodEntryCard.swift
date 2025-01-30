@@ -19,7 +19,7 @@ struct MoodEntryCard: View {
                 // Additional mood details can be added here
             }
             .padding()
-            .background(Color.white)
+            .background(Color(UIColor.secondarySystemBackground))
             .cornerRadius(12)
             .shadow(radius: 5)
         }

@@ -18,7 +18,7 @@ struct InsightsView: View {
                     }
                 }
                 .padding()
-                .navigationTitle("Insights") // Set the navigation title within NavigationStack
+                .navigationTitle("Insights")
             }
         }
     }
@@ -30,9 +30,12 @@ struct InsightsView: View {
                 y: .value("Mood", moodValue(for: entry.moodRating))
             )
             .interpolationMethod(.catmullRom)
-            .foregroundStyle(.purple)
+            .foregroundStyle(Color.purple) 
         }
         .frame(height: 200)
+        .background(Color(UIColor.secondarySystemBackground))
+        .cornerRadius(12)
+        .shadow(radius: 5)
     }
     
     private var moodDistributionChart: some View {
@@ -46,6 +49,9 @@ struct InsightsView: View {
             }
         }
         .frame(height: 200)
+        .background(Color(UIColor.secondarySystemBackground)) // Background adapts to system appearance
+        .cornerRadius(12)
+        .shadow(radius: 5)
     }
 
     private func moodValue(for mood: MoodRating) -> Int {
@@ -72,11 +78,13 @@ struct ChartCardView<Content: View>: View {
                 .font(.headline)
                 .padding(.leading)
                 .padding(.top, 10)
+                .foregroundColor(.primary)
             
             content
                 .padding()
         }
-        .background(RoundedRectangle(cornerRadius: 12).fill(Color(.systemBackground)))
+        .background(Color(UIColor.secondarySystemBackground))
+        .cornerRadius(12)
         .shadow(radius: 5)
     }
 }
