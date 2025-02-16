@@ -3,12 +3,11 @@ import SwiftUI
 struct HomeView: View {
     var moodEntries: [MoodEntry]
     var recommendations: [Recommendation]
-
+    
     var body: some View {
-        NavigationStack {  // Move NavigationStack outside
+        NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    
                     Text("Welcome to Mindfulness App")
                         .font(.title)
                         .padding()
@@ -23,11 +22,10 @@ struct HomeView: View {
                             .cornerRadius(10)
                     }
                     .padding(.horizontal)
-
                 }
                 .padding()
             }
-            .navigationTitle("Home") // Title stays in NavigationStack
+            .navigationTitle("Home")
         }
     }
 }

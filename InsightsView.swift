@@ -59,6 +59,10 @@ struct InsightsView: View {
         case .happy: return 3
         case .neutral: return 2
         case .sad: return 1
+        case .stressed:
+            return 4
+        case .relaxed:
+            return 5
         }
     }
 }

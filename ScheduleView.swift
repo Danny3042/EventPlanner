@@ -57,8 +57,7 @@ struct ScheduleView: View {
             }
         }
     }
-
-
+    
     private func initializeWeekEntries() {
         let currentWeekDates = getWeek()
         for date in currentWeekDates {
