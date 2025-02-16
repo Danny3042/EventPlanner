@@ -33,9 +33,15 @@ let package = Package(
             ]
         )
     ],
+    dependencies: [
+        .package(url: "https://github.com/LottieFiles/dotlottie-ios", .branch("main"))
+    ],
     targets: [
         .executableTarget(
             name: "AppModule",
+            dependencies: [
+                .product(name: "DotLottie", package: "dotlottie-ios")
+            ],
             path: ".",
             resources: [
                 .process("Resources"),

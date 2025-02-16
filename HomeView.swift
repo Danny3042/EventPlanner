@@ -23,7 +23,16 @@ struct HomeView: View {
                     }
                     .padding(.horizontal)
                 }
-                .padding()
+                NavigationLink(destination: MeditationView()) {
+                    Text("Start Meditation")
+                        .font(.headline)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
+                .padding(.horizontal)
             }
             .navigationTitle("Home")
         }
