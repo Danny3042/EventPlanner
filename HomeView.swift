@@ -8,7 +8,7 @@ struct HomeView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    Text("Welcome to Mindfulness App")
+                    Text("Discover the AR bubbles and pop them to relieve stress. Tap anywhere to pop the bubbles.")
                         .font(.title)
                         .padding()
 

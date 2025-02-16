@@ -124,18 +124,18 @@ struct ARViewRepresentable: UIViewControllerRepresentable {
 //MARK: SwiftUI AR Experience view
 
 struct ARExperienceView: View {
-    @State private var hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "hasCompletedAROnboarding")
+    @State private var hasCompletedAROnboarding = UserDefaults.standard.bool(forKey: "hasCompletedAROnboarding")
     
     var body : some View {
         VStack {
-            if hasCompletedOnboarding {
+            if hasCompletedAROnboarding {
                 ARExperienceView()
             } else {
-                AROnboardingView(hasCompletedOnboarding: $hasCompletedOnboarding)
+                AROnboardingView(hasCompletedAROnboarding: $hasCompletedAROnboarding)
             }
         }
-        .onChange(of: hasCompletedOnboarding) {
-            UserDefaults.standard.set($0, forKey: "hasCompletedOnboarding")
+        .onChange(of: hasCompletedAROnboarding) {
+            UserDefaults.standard.set($0, forKey: "hasCompletedAROnboarding")
         }
     }
 }

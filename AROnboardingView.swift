@@ -7,7 +7,7 @@
 import SwiftUI
 
 struct AROnboardingView: View {
-    @Binding var hasCompletedOnboarding: Bool
+    @Binding var hasCompletedAROnboarding: Bool
     
     // Declare pages as a computed property
     var pages: [AROnboardingPage] {
@@ -22,7 +22,7 @@ struct AROnboardingView: View {
         TabView {
             ForEach(pages.indices, id: \.self) { index in
                 AROnboardingPageView(page: pages[index], isLastPage: index == pages.count - 1, onFinish: {
-                    hasCompletedOnboarding = true
+                    hasCompletedAROnboarding = true
                 })
             }
         }
