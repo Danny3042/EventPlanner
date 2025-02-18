@@ -3,7 +3,10 @@ import SwiftData
 import Charts
 
 struct InsightsView: View {
-    @Query(sort: \DayEntry.date, order: .forward) private var moodEntries: [DayEntry] // Fetch all entries
+    @Query(sort: \DayEntry.date, order: .forward) private var moodEntries: [DayEntry]
+    @Query(sort: \MeditationSession.date, order: .forward) private var meditationSessions: [MeditationSession]
+
+    @State private var selectedTimeframe: Timeframe = .weekly
 
     var body: some View {
         NavigationStack {
@@ -15,6 +18,11 @@ struct InsightsView: View {
                     
                     ChartCardView(title: "Mood Distribution") {
                         moodDistributionChart
+                    }
+
+                    ChartCardView(title: "Meditation Sessions") {
+                        timeframePicker
+                        meditationChart
                     }
                 }
                 .padding()
@@ -30,7 +38,7 @@ struct InsightsView: View {
                 y: .value("Mood", moodValue(for: entry.moodRating))
             )
             .interpolationMethod(.catmullRom)
-            .foregroundStyle(Color.purple) 
+            .foregroundStyle(Color.purple)
         }
         .frame(height: 200)
         .background(Color(UIColor.secondarySystemBackground))
@@ -49,7 +57,42 @@ struct InsightsView: View {
             }
         }
         .frame(height: 200)
-        .background(Color(UIColor.secondarySystemBackground)) // Background adapts to system appearance
+        .background(Color(UIColor.secondarySystemBackground))
+        .cornerRadius(12)
+        .shadow(radius: 5)
+    }
+
+    private var timeframePicker: some View {
+        Picker("Timeframe", selection: $selectedTimeframe) {
+            Text("Weekly").tag(Timeframe.weekly)
+            Text("Monthly").tag(Timeframe.monthly)
+        }
+        .pickerStyle(SegmentedPickerStyle())
+        .padding(.horizontal)
+    }
+
+    private var meditationChart: some View {
+        let filteredSessions = meditationSessions.filter { session in
+            let calendar = Calendar.current
+            let now = Date()
+
+            switch selectedTimeframe {
+            case .weekly:
+                return calendar.isDate(session.date, equalTo: now, toGranularity: .weekOfYear)
+            case .monthly:
+                return calendar.isDate(session.date, equalTo: now, toGranularity: .month)
+            }
+        }
+
+        return Chart(filteredSessions) { session in
+            BarMark(
+                x: .value("Date", session.date, unit: .day),
+                y: .value("Minutes", session.duration)
+            )
+            .foregroundStyle(Color.blue)
+        }
+        .frame(height: 200)
+        .background(Color(UIColor.secondarySystemBackground))
         .cornerRadius(12)
         .shadow(radius: 5)
     }
@@ -59,23 +102,26 @@ struct InsightsView: View {
         case .happy: return 3
         case .neutral: return 2
         case .sad: return 1
-        case .stressed:
-            return 4
-        case .relaxed:
-            return 5
+        case .stressed: return 4
+        case .relaxed: return 5
         }
+    }
+
+    enum Timeframe {
+        case weekly
+        case monthly
     }
 }
 
 struct ChartCardView<Content: View>: View {
     let title: String
     let content: Content
-
+    
     init(title: String, @ViewBuilder content: () -> Content) {
         self.title = title
         self.content = content()
     }
-
+    
     var body: some View {
         VStack(alignment: .leading) {
             Text(title)

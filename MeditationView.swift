@@ -1,127 +1,94 @@
 import SwiftUI
-import UIKit
+import SwiftData
+import AVFoundation
 
 struct MeditationView: View {
-    @State private var inhaleDuration: Double = 4
-    @State private var holdDuration: Double = 2
-    @State private var exhaleDuration: Double = 4
-    @State private var currentPhase: BreathingPhase = .inhale
-    @State private var timer: Timer?
-    @State private var timerCountDown: Double = 0
-    @State private var breathingAnimationScale: CGFloat = 1.0
-    
-    // Haptic feedback generator
-    let feedbackGenerator = UIImpactFeedbackGenerator(style: .medium)
-    
-    enum BreathingPhase {
-        case inhale, hold, exhale
-    }
-    
+    @Environment(\.modelContext) private var modelContext
+    @State private var meditationDuration = 1  // Default duration in minutes
+    @State private var isMeditating = false
+    @State private var progress: CGFloat = 0.0
+    @State private var scale: CGFloat = 1.0
+    @State private var player: AVAudioPlayer?
+
     var body: some View {
         VStack {
-            Text("Breathing Meditation")
-                .font(.title)
-                .padding()
-            
-            Text("Current Phase: \(currentPhase == .inhale ? "Inhale" : currentPhase == .hold ? "Hold" : "Exhale")")
+            Text("Set Meditation Duration")
                 .font(.headline)
                 .padding()
-            
-            // Pulsating Circle Animation
+
+            Picker("Duration", selection: $meditationDuration) {
+                ForEach([1, 5, 10, 15, 20, 30], id: \.self) { minutes in
+                    Text("\(minutes) min").tag(minutes)
+                }
+            }
+            .pickerStyle(SegmentedPickerStyle())
+            .padding()
+
+            Spacer()
+
+            // Pulsating Animation
             Circle()
-                .scaleEffect(breathingAnimationScale) // Pulsating effect
+                .fill(Color.blue.opacity(0.5))
                 .frame(width: 200, height: 200)
-                .foregroundColor(Color.blue.opacity(0.4))
+                .scaleEffect(scale)
+                .animation(isMeditating ? .easeInOut(duration: 3).repeatForever(autoreverses: true) : .default, value: scale)
+                .onAppear {
+                    scale = 1.2  // Start pulsating
+                }
+
+            Text(isMeditating ? "Breathe in... Breathe out..." : "Ready to Start")
+                .font(.headline)
                 .padding()
-                .animation(
-                    Animation.easeInOut(duration: 1.5)
-                        .repeatForever(autoreverses: true), value: breathingAnimationScale
-                )
-            
-            Button(action: startBreathing) {
-                Text("Start Breathing")
-                    .font(.headline)
+
+            Spacer()
+
+            Button(action: startMeditation) {
+                Text(isMeditating ? "Meditating..." : "Start Meditation")
                     .padding()
                     .frame(maxWidth: .infinity)
-                    .background(Color.blue)
+                    .background(isMeditating ? Color.gray : Color.blue)
                     .foregroundColor(.white)
-                    .cornerRadius(10)
+                    .clipShape(Capsule())
+                    .animation(.easeInOut, value: isMeditating)
             }
+            .disabled(isMeditating)
             .padding()
-            
-            // Timer display
-            Text("\(Int(timerCountDown)) seconds remaining")
-                .font(.subheadline)
-                .padding()
         }
-        .onChange(of: currentPhase) { newPhase in
-            // Update animation scale and provide haptic feedback at each phase
-            updateBreathingAnimation(for: newPhase)
-            feedbackGenerator.impactOccurred()
+        .padding()
+    }
+
+    func startMeditation() {
+        isMeditating = true
+        scale = 1.5  // Start animation
+
+        // Haptic feedback starts
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.impactOccurred()
+
+        // meditation session simulation
+        DispatchQueue.main.asyncAfter(deadline: .now() + Double(meditationDuration) * 60) {
+            isMeditating = false
+            scale = 1.0  // Stop pulsating
+
+            // Session saved to SwiftData
+            let newSession = MeditationSession(date: Date(), duration: meditationDuration)
+            modelContext.insert(newSession)
+
+            // Haptic feedback when completed
+            let successGenerator = UINotificationFeedbackGenerator()
+            successGenerator.notificationOccurred(.success)
+
+            playChimeSound()
         }
     }
-    
-    // Function to start the breathing timer
-    func startBreathing() {
-        // Prepare feedback
-        feedbackGenerator.prepare()
-        
-        // Start the first phase
-        startPhaseTimer(for: .inhale)
-    }
-    
-    // Function to start a phase (inhale, hold, exhale)
-    func startPhaseTimer(for phase: BreathingPhase) {
-        currentPhase = phase
-        
-        let duration: Double
-        
-        switch phase {
-        case .inhale:
-            duration = inhaleDuration
-        case .hold:
-            duration = holdDuration
-        case .exhale:
-            duration = exhaleDuration
-        }
-        
-        // Set the timer for the phase
-        timerCountDown = duration
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
-            self.timerCountDown -= 1
-            
-            if self.timerCountDown <= 0 {
-                self.timer?.invalidate()
-                self.timer = nil
-                
-                // Move to the next phase
-                self.nextPhase()
-            }
-        }
-    }
-    
-    // Function to move to the next phase
-    func nextPhase() {
-        switch currentPhase {
-        case .inhale:
-            startPhaseTimer(for: .hold)
-        case .hold:
-            startPhaseTimer(for: .exhale)
-        case .exhale:
-            // Optionally, loop back to inhale or finish meditation
-            startPhaseTimer(for: .inhale)
-        }
-    }
-    
-    // Function to update the animation and scale for each phase
-    func updateBreathingAnimation(for phase: BreathingPhase) {
-        switch phase {
-        case .inhale:
-            breathingAnimationScale = 1.5 // Expand during inhale
-        case .hold:
-            breathingAnimationScale = 1.0 // Hold at the original size
-        case .exhale:
-            breathingAnimationScale = 0.5 // Shrink during exhale
+
+    func playChimeSound() {
+        guard let url = Bundle.main.url(forResource: "chime", withExtension: "mp3") else { return }
+        do {
+            player = try AVAudioPlayer(contentsOf: url)
+            player?.play()
+        } catch {
+            print("Error playing sound: \(error.localizedDescription)")
         }
     }
 }
