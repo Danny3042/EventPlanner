@@ -64,13 +64,7 @@ struct HomeView: View {
                         iconName: "pills",
                         destination: AnyView(MedicationARView())
                     )
-                        
-                    CardView(
-                        title: "View Medications",
-                        description: "View your medication schedule and set reminders.",
-                        iconName: "pills",
-                        destination: AnyView(MedicationListView())
-                    )
+
                 }
                 .padding(.top)
             }

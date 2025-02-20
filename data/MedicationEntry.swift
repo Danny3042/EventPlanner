@@ -7,18 +7,32 @@
 
 import Foundation
 import SwiftData
+import RealityKit
+import SwiftUICore
+
 
 @Model
 class Medication {
     var name: String
-    var dosage: String
-    var pillsRemaining: Int
-    var taken: Bool
-    
-    init(name: String, dosage: String, pillsRemaining: Int, taken: Bool = false) {
+    var dateScanned: Date
+
+    init(name: String, dateScanned: Date) {
         self.name = name
-        self.dosage = dosage
-        self.pillsRemaining = pillsRemaining
-        self.taken = taken
+        self.dateScanned = dateScanned
+    }
+}
+
+class MedicationStore {
+    static let shared = MedicationStore()
+    
+    @Environment(\.modelContext) private var modelContext
+
+    func save(medication: Medication) {
+        modelContext.insert(medication)
+        try? modelContext.save()
+    }
+
+    func fetchAllMedications() -> [Medication] {
+        return (try? modelContext.fetch(FetchDescriptor<Medication>())) ?? []
     }
 }
