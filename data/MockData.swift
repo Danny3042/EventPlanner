@@ -18,3 +18,5 @@ let mockRecommendations: [Recommendation] = [
     Recommendation(text: "Log your mood every evening"),
     Recommendation(text: "Spend 10 minutes meditating")
 ]
+
+

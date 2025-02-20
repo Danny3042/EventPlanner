@@ -3,10 +3,16 @@ import SwiftData
 
 @main
 struct MyApp: App {
+    @AppStorage("hasSeenOnboarding") var hasSeenOnboarding: Bool = false
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .modelContainer(for: [DayEntry.self])
+            if hasSeenOnboarding {
+                ContentView()
+                    .modelContainer(for: [DayEntry.self, Medication.self])
+            } else {
+                OnboardingView()
+            }
+            
         }
     }
 }

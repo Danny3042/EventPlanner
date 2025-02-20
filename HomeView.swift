@@ -19,19 +19,19 @@ struct CardView: View {
             .padding(.bottom, 5)
             Text(description)
                 .font(.subheadline)
-                .foregroundColor(.gray)
+                .foregroundColor(.secondary)
             NavigationLink(destination: destination) {
                 Text("Go")
                     .font(.headline)
                     .padding()
                     .frame(maxWidth: .infinity)
-                    .background(Color.blue)
+                    .background(Color(UIColor.systemBlue))
                     .foregroundColor(.white)
                     .cornerRadius(10)
             }
         }
         .padding()
-        .background(Color.white)
+        .background(Color(UIColor.systemBackground))
         .cornerRadius(10)
         .shadow(radius: 5)
         .padding(.horizontal)
@@ -39,9 +39,6 @@ struct CardView: View {
 }
 
 struct HomeView: View {
-    var moodEntries: [MoodEntry]
-    var recommendations: [Recommendation]
-
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -59,6 +56,20 @@ struct HomeView: View {
                         description: "Begin a guided meditation session to relax and unwind.",
                         iconName: "leaf.arrow.circlepath",
                         destination: AnyView(MeditationView())
+                    )
+
+                    CardView(
+                        title: "Track Medications in AR",
+                        description: "View your medication schedule in augmented reality.",
+                        iconName: "pills",
+                        destination: AnyView(MedicationARView())
+                    )
+                        
+                    CardView(
+                        title: "View Medications",
+                        description: "View your medication schedule and set reminders.",
+                        iconName: "pills",
+                        destination: AnyView(MedicationListView())
                     )
                 }
                 .padding(.top)

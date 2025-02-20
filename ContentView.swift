@@ -15,7 +15,7 @@ struct ContentView: View {
             if hasShownOnboarding {
                 UITabBarWrapper([
                     TabBarElement(tabBarElementItem: .init(title: "Home", systemImageName: "house.fill")) {
-                        HomeView(moodEntries: homeViewModel.moodEntries, recommendations: homeViewModel.recommendations)
+                        HomeView()
                     },
                     TabBarElement(tabBarElementItem: .init(title: "Schedule", systemImageName: "calendar")) {
                         ScheduleView()
