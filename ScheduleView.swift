@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import Combine
 
 struct ScheduleView: View {
     @Environment(\.modelContext) private var modelContext
@@ -13,36 +14,37 @@ struct ScheduleView: View {
         NavigationStack {
             ZStack {
                 VStack {
-                    // Week view
-                    weekCalendarView(selectedDate: $selectedDate, onDateSelected: selectOrCreateEntry)
-                    
+                    // DatePicker view
+                    DatePicker(
+                        "Select a date",
+                        selection: $selectedDate,
+                        displayedComponents: [.date]
+                    )
+                    .datePickerStyle(GraphicalDatePickerStyle())
+                    .padding()
+                    .onReceive(Just(selectedDate)) { newDate in
+                        selectOrCreateEntry(for: newDate)
+                    }
+
                     if let selectedEntry = selectedEntry {
                         MoodEntryCard(entry: selectedEntry)
                             .padding()
                     }
-                    
+
                     Spacer()
                 }
                 .onAppear {
                     initializeWeekEntries()
                     selectOrCreateEntry(for: selectedDate)
                 }
-                
+
                 // Floating Action Button
                 VStack {
                     Spacer()
                     HStack {
                         Spacer()
-                        Button(action: {
+                        FloatingActionButton {
                             showMoodInputModal.toggle()
-                        }) {
-                            Image(systemName: "plus")
-                                .font(.system(size: 24))
-                                .frame(width: 60, height: 60)
-                                .foregroundColor(.white)
-                                .background(Color.purple)
-                                .clipShape(Circle())
-                                .shadow(radius: 5)
                         }
                         .padding(.bottom, 20)
                         .padding(.trailing, 20)
@@ -51,13 +53,15 @@ struct ScheduleView: View {
             }
             .navigationTitle("Schedule")
             .sheet(isPresented: $showMoodInputModal) {
-                MoodInputModalView(dayEntry: selectedEntry ?? DayEntry(date: Date(), moodRating: .neutral),
-                                   onSave: saveMoodEntry,
-                                   onCancel: { showMoodInputModal = false })
+                MoodInputModalView(
+                    dayEntry: selectedEntry ?? DayEntry(date: Date(), moodRating: .neutral),
+                    onSave: saveMoodEntry,
+                    onCancel: { showMoodInputModal = false }
+                )
             }
         }
     }
-    
+
     private func initializeWeekEntries() {
         let currentWeekDates = getWeek()
         for date in currentWeekDates {
@@ -66,6 +70,7 @@ struct ScheduleView: View {
                 modelContext.insert(newEntry)
             }
         }
+        try? modelContext.save()
     }
 
     private func selectOrCreateEntry(for date: Date) {
@@ -76,6 +81,7 @@ struct ScheduleView: View {
             modelContext.insert(newEntry)
             selectedEntry = newEntry
         }
+        try? modelContext.save()
     }
 
     private func saveMoodEntry(entry: DayEntry) {
@@ -84,6 +90,7 @@ struct ScheduleView: View {
         } else {
             modelContext.insert(entry)
         }
+        try? modelContext.save()
         showMoodInputModal = false
     }
 
@@ -91,55 +98,7 @@ struct ScheduleView: View {
         let calendar = Calendar.current
         let today = Date()
         let components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: today)
-        let startOfWeek = calendar.date(from: components) ?? today
+        guard let startOfWeek = calendar.date(from: components) else { return [] }
         return (0..<7).compactMap { calendar.date(byAdding: .day, value: $0, to: startOfWeek) }
-    }
-
-    private func weekCalendarView(selectedDate: Binding<Date>, onDateSelected: @escaping (Date) -> Void) -> some View {
-        let dates = getWeek()
-        let calendar = Calendar.current
-
-        return VStack {
-            Text(getMonth(date: Date()))
-                .font(.title)
-                .padding(.bottom, 10)
-
-            ScrollView(.horizontal) {
-                HStack {
-                    ForEach(dates, id: \.self) { day in
-                        VStack {
-                            Text(getDayShort(date: day))
-                                .font(.body)
-                            Text("\(getDayNumber(date: day))")
-                                .font(.body)
-                        }
-                        .frame(width: 45, height: 45)
-                        .background(calendar.isDate(selectedDate.wrappedValue, inSameDayAs: day) ? Color.purple.opacity(0.5) : Color.gray.opacity(0.3))
-                        .cornerRadius(10)
-                        .onTapGesture {
-                            selectedDate.wrappedValue = day
-                            onDateSelected(day)
-                        }
-                    }
-                }
-            }
-            .padding(.horizontal)
-        }
-    }
-
-    private func getMonth(date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "LLLL"
-        return formatter.string(from: date)
-    }
-
-    private func getDayShort(date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "E"
-        return formatter.string(from: date)
-    }
-
-    private func getDayNumber(date: Date) -> Int {
-        return Calendar.current.component(.day, from: date)
     }
 }
