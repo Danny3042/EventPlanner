@@ -1,12 +1,5 @@
-//
-//  File.swift
-//  MediApp
-//
-//  Created by Daniel Ramzani on 20/02/2025.
-//
-
 import RealityKit
-import SwiftUI
+import UIKit
 
 class ARFloatingPill {
     static func createFloatingPill(medicationName: String, dosage: String, color: UIColor = .red, radius: Float = 0.05) -> AnchorEntity {
@@ -20,8 +13,8 @@ class ARFloatingPill {
         // Attach a text label for medication details
         let textEntity = createTextEntity(medicationName: medicationName, dosage: dosage)
 
-        // Position the text slightly above the pill
-        textEntity.position = SIMD3(0, 0.1, 0)
+        // Position the text above the pill
+        textEntity.position = SIMD3(0, radius + 0.05, 0)
 
         anchor.addChild(pill)
         anchor.addChild(textEntity)
