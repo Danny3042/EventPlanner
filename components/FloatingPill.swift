@@ -1,5 +1,25 @@
 import RealityKit
 import UIKit
+import SwiftUI
+
+struct ARFloatingPillView: UIViewRepresentable {
+    var medicationName: String
+    var dosage: String
+    var color: UIColor
+    var radius: Float
+
+    func makeUIView(context: Context) -> ARView {
+        let arView = ARView(frame: .zero)
+        arView.automaticallyConfigureSession = false // Disable AR session
+
+        let anchor = ARFloatingPill.createFloatingPill(medicationName: medicationName, dosage: dosage, color: color, radius: radius)
+        arView.scene.anchors.append(anchor)
+        return arView
+    }
+
+    func updateUIView(_ uiView: ARView, context: Context) {}
+}
+
 
 class ARFloatingPill {
     static func createFloatingPill(medicationName: String, dosage: String, color: UIColor = .red, radius: Float = 0.05) -> AnchorEntity {

@@ -62,7 +62,7 @@ struct HomeView: View {
                         title: "Track Medications in AR",
                         description: "View your medication schedule in augmented reality.",
                         iconName: "pills",
-                        destination: AnyView(MedicationARView())
+                        destination: AnyView(MedicationListView())
                     )
 
                 }
