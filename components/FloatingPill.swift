@@ -1,88 +1,77 @@
-import RealityKit
-import UIKit
 import SwiftUI
+import SceneKit
 
-struct ARFloatingPillView: UIViewRepresentable {
+struct FloatingPillView: UIViewRepresentable {
     var medicationName: String
     var dosage: String
     var color: UIColor
     var radius: Float
 
-    func makeUIView(context: Context) -> ARView {
-        let arView = ARView(frame: .zero)
-        arView.automaticallyConfigureSession = true
+    func makeUIView(context: Context) -> SCNView {
+        let scnView = SCNView(frame: .zero)
+        scnView.scene = SCNScene()
+        scnView.allowsCameraControl = true
+        scnView.backgroundColor = UIColor.black
 
-        let anchor = ARFloatingPill.createFloatingPill(medicationName: medicationName, dosage: dosage, color: color, radius: radius)
-        arView.scene.anchors.append(anchor)
-        return arView
+        let pillNode = createFloatingPill(medicationName: medicationName, dosage: dosage, color: color, radius: radius)
+        scnView.scene?.rootNode.addChildNode(pillNode)
+
+        return scnView
     }
 
-    func updateUIView(_ uiView: ARView, context: Context) {}
-}
+    func updateUIView(_ uiView: SCNView, context: Context) {}
 
+    private func createFloatingPill(medicationName: String, dosage: String, color: UIColor, radius: Float) -> SCNNode {
+        let pillNode = SCNNode()
 
-class ARFloatingPill {
-    static func createFloatingPill(medicationName: String, dosage: String, color: UIColor = .red, radius: Float = 0.05) -> AnchorEntity {
-        let anchor = AnchorEntity(plane: .horizontal)
+        let cylinder = SCNCylinder(radius: CGFloat(radius), height: CGFloat(radius))
+        let hemisphereTop = SCNSphere(radius: CGFloat(radius))
+        let hemisphereBottom = SCNSphere(radius: CGFloat(radius))
 
-        // Create the floating pill as a capsule manually
-        let cylinder = ModelEntity(mesh: .generateCylinder(height: radius, radius: radius))
-        let hemisphereTop = ModelEntity(mesh: .generateSphere(radius: radius))
-        let hemisphereBottom = ModelEntity(mesh: .generateSphere(radius: radius))
+        let cylinderNode = SCNNode(geometry: cylinder)
+        let hemisphereTopNode = SCNNode(geometry: hemisphereTop)
+        let hemisphereBottomNode = SCNNode(geometry: hemisphereBottom)
 
-        // Position the hemispheres
-        hemisphereTop.position = SIMD3(0, radius, 0)
-        hemisphereBottom.position = SIMD3(0, -radius, 0)
+        hemisphereTopNode.position = SCNVector3(0, radius, 0)
+        hemisphereBottomNode.position = SCNVector3(0, -radius, 0)
 
-        // Combine the parts into a single entity
-        let pill = ModelEntity()
-        pill.addChild(cylinder)
-        pill.addChild(hemisphereTop)
-        pill.addChild(hemisphereBottom)
+        let material = SCNMaterial()
+        material.diffuse.contents = color
+        cylinder.materials = [material]
+        hemisphereTop.materials = [material]
+        hemisphereBottom.materials = [material]
 
-        // Apply the material
-        pill.model?.materials = [SimpleMaterial(color: color, isMetallic: false)]
-        pill.name = medicationName // Set name for easy identification
+        pillNode.addChildNode(cylinderNode)
+        pillNode.addChildNode(hemisphereTopNode)
+        pillNode.addChildNode(hemisphereBottomNode)
 
-        // Attach a text label for medication details
-        let textEntity = createTextEntity(medicationName: medicationName, dosage: dosage)
+        let textNode = createTextNode(medicationName: medicationName, dosage: dosage)
+        textNode.position = SCNVector3(0, radius * 2 + 0.05, 0)
+        pillNode.addChildNode(textNode)
 
-        // Position the text above the pill
-        textEntity.position = SIMD3(0, radius * 2 + 0.05, 0)
+        animateFloating(pillNode)
+        animateFloating(textNode)
 
-        anchor.addChild(pill)
-        anchor.addChild(textEntity)
-
-        animateFloating(pill)
-        animateFloating(textEntity) // Make text float too
-
-        return anchor
+        return pillNode
     }
 
+    private func createTextNode(medicationName: String, dosage: String) -> SCNNode {
+        let text = SCNText(string: "\(medicationName)\n\(dosage)", extrusionDepth: 0.005)
+        text.font = UIFont.systemFont(ofSize: 0.02)
+        text.firstMaterial?.diffuse.contents = UIColor.white
 
-    private static func createTextEntity(medicationName: String, dosage: String) -> ModelEntity {
-        let textMesh = MeshResource.generateText("\(medicationName)\n\(dosage)",
-            extrusionDepth: 0.005, font: .systemFont(ofSize: 0.02))
-        
-        let textMaterial = SimpleMaterial(color: .white, isMetallic: false)
-        let textEntity = ModelEntity(mesh: textMesh, materials: [textMaterial])
+        let textNode = SCNNode(geometry: text)
+        textNode.scale = SCNVector3(0.1, 0.1, 0.1)
 
-        textEntity.generateCollisionShapes(recursive: true) // Enable tap detection
-        return textEntity
+        return textNode
     }
 
-    private static func animateFloating(_ entity: ModelEntity) {
-        let moveUp = Transform(translation: [0, 0.1, 0])
-        let moveDown = Transform(translation: [0, 0, 0])
+    private func animateFloating(_ node: SCNNode) {
+        let moveUp = SCNAction.moveBy(x: 0, y: 0.1, z: 0, duration: 1.5)
+        let moveDown = SCNAction.moveBy(x: 0, y: -0.1, z: 0, duration: 1.5)
+        let sequence = SCNAction.sequence([moveUp, moveDown])
+        let repeatForever = SCNAction.repeatForever(sequence)
 
-        entity.move(to: moveUp, relativeTo: entity.parent, duration: 1.5, timingFunction: .easeInOut)
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            entity.move(to: moveDown, relativeTo: entity.parent, duration: 1.5, timingFunction: .easeInOut)
-            
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                animateFloating(entity) // Loop animation
-            }
-        }
+        node.runAction(repeatForever)
     }
 }

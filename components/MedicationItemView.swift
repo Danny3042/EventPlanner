@@ -21,7 +21,7 @@ struct MedicationItemView: View {
                 .foregroundColor(.secondary)
                 .padding(.bottom, 10)
 
-            ARFloatingPillView(medicationName: medicationName, dosage: dosage, color: .red, radius: 0.05)
+            FloatingPillView(medicationName: medicationName, dosage: dosage, color: .red, radius: 0.05)
                 .frame(height: 200) // Adjust the height as needed
         }
         .padding()
