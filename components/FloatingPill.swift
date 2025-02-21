@@ -10,7 +10,7 @@ struct ARFloatingPillView: UIViewRepresentable {
 
     func makeUIView(context: Context) -> ARView {
         let arView = ARView(frame: .zero)
-        arView.automaticallyConfigureSession = false // Disable AR session
+        arView.automaticallyConfigureSession = true
 
         let anchor = ARFloatingPill.createFloatingPill(medicationName: medicationName, dosage: dosage, color: color, radius: radius)
         arView.scene.anchors.append(anchor)
@@ -25,16 +25,30 @@ class ARFloatingPill {
     static func createFloatingPill(medicationName: String, dosage: String, color: UIColor = .red, radius: Float = 0.05) -> AnchorEntity {
         let anchor = AnchorEntity(plane: .horizontal)
 
-        // Create the floating pill
-        let pill = ModelEntity(mesh: .generateSphere(radius: radius))
+        // Create the floating pill as a capsule manually
+        let cylinder = ModelEntity(mesh: .generateCylinder(height: radius, radius: radius))
+        let hemisphereTop = ModelEntity(mesh: .generateSphere(radius: radius))
+        let hemisphereBottom = ModelEntity(mesh: .generateSphere(radius: radius))
+
+        // Position the hemispheres
+        hemisphereTop.position = SIMD3(0, radius, 0)
+        hemisphereBottom.position = SIMD3(0, -radius, 0)
+
+        // Combine the parts into a single entity
+        let pill = ModelEntity()
+        pill.addChild(cylinder)
+        pill.addChild(hemisphereTop)
+        pill.addChild(hemisphereBottom)
+
+        // Apply the material
         pill.model?.materials = [SimpleMaterial(color: color, isMetallic: false)]
         pill.name = medicationName // Set name for easy identification
-        
+
         // Attach a text label for medication details
         let textEntity = createTextEntity(medicationName: medicationName, dosage: dosage)
 
         // Position the text above the pill
-        textEntity.position = SIMD3(0, radius + 0.05, 0)
+        textEntity.position = SIMD3(0, radius * 2 + 0.05, 0)
 
         anchor.addChild(pill)
         anchor.addChild(textEntity)
@@ -44,6 +58,7 @@ class ARFloatingPill {
 
         return anchor
     }
+
 
     private static func createTextEntity(medicationName: String, dosage: String) -> ModelEntity {
         let textMesh = MeshResource.generateText("\(medicationName)\n\(dosage)",

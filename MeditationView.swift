@@ -21,7 +21,7 @@ struct MeditationView: View {
 
             // Pulsating Animation
             Circle()
-                .fill(Color.blue.opacity(0.5))
+                .fill(Color.blue.opacity(1))
                 .frame(width: 200, height: 200)
                 .scaleEffect(scale)
                 .animation(isMeditating ? .easeInOut(duration: 3).repeatForever(autoreverses: true) : .default, value: scale)
