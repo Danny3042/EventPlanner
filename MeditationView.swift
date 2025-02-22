@@ -16,7 +16,6 @@ struct MeditationView: View {
 
     var body: some View {
         VStack {
-
             Spacer()
 
             // Pulsating Animation
@@ -45,68 +44,71 @@ struct MeditationView: View {
 
             Spacer()
 
-            Button(action: startMeditation) {
-                Text(isMeditating ? "Meditating..." : "Start Meditation")
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(isMeditating ? Color.gray : Color.blue)
-                    .foregroundColor(.white)
-                    .clipShape(Capsule())
-                    .animation(.easeInOut, value: isMeditating)
-            }
-            .disabled(isMeditating)
-            .padding()
-
-            if isMeditating {
-                Button(action: stopMeditation) {
-                    Text("Stop Meditation")
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color.red)
-                        .foregroundColor(.white)
-                        .clipShape(Capsule())
-                }
-                .padding()
-            }
-
-            Button(action: {
-                showPopover = true
-            }) {
-                Text("Set Duration")
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color.green)
-                    .foregroundColor(.white)
-                    .clipShape(Capsule())
-            }
-            .padding()
-            .popover(isPresented: $showPopover) {
-                VStack {
-                    Text("Select Duration")
-                        .font(.headline)
-                        .padding()
-                    Stepper(value: $meditationDuration, in: 1...30, step: 5) {
-                        Text("\(meditationDuration) minutes")
-                    }
-                    .padding()
-                    Button("Done") {
-                        showPopover = false
+            HStack {
+                if !isMeditating {
+                    Button(action: startMeditation) {
+                        Text("Start")
+                            .padding()
+                            .frame(width: 100, height: 100)
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .clipShape(Circle())
+                            .animation(.easeInOut, value: isMeditating)
                     }
                     .padding()
                 }
-                .padding()
-            }
 
-            if isChimePlaying {
-                Button(action: stopChimeSound) {
-                    Text("Stop Chime")
+                if isMeditating {
+                    Button(action: stopMeditation) {
+                        Text("Stop")
+                            .padding()
+                            .frame(width: 100, height: 100)
+                            .background(Color.red)
+                            .foregroundColor(.white)
+                            .clipShape(Circle())
+                    }
+                    .padding()
+                }
+
+                Button(action: {
+                    showPopover = true
+                }) {
+                    Text("Duration")
                         .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color.red)
+                        .frame(width: 100, height: 100)
+                        .background(Color.green)
                         .foregroundColor(.white)
-                        .clipShape(Capsule())
+                        .clipShape(Circle())
                 }
                 .padding()
+                .popover(isPresented: $showPopover) {
+                    VStack {
+                        Text("Select Duration")
+                            .font(.headline)
+                            .padding()
+                        Stepper(value: $meditationDuration, in: 1...30, step: 5) {
+                            Text("\(meditationDuration) minutes")
+                        }
+                        .padding()
+                        Button("Done") {
+                            showPopover = false
+                        }
+                        .padding()
+                    }
+                    .padding()
+                }
+
+                if isChimePlaying {
+                    Button(action: stopChimeSound) {
+                        Text("Stop")
+                            .padding()
+                            .frame(width: 100, height: 100)
+                            .background(Color.red)
+                            .foregroundColor(.white)
+                            .clipShape(Circle())
+                    }
+                    .padding()
+                }
             }
         }
         .padding()
