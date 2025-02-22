@@ -1,55 +1,64 @@
-//
-//  AROnboardingView.swift
-//  MediApp
-//
-//  Created by Daniel Ramzani on 16/02/2025.
-//
 import SwiftUI
 
 struct AROnboardingView: View {
-    @Binding var hasCompletedAROnboarding: Bool
+    @State private var currentPage = 0
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     
-    // Declare pages as a computed property
-    var pages: [AROnboardingPage] {
-        return [
-            AROnboardingPage(title: "Welcome to AR!", description: "Discover the AR bubbles and pop them to relieve stress. Tap anywhere to pop the bubbles."),
-            AROnboardingPage(title: "How to Play", description: "Tap on a bubble to pop it. Watch the bubbles disappear and hear a fun pop sound!"),
-            AROnboardingPage(title: "Let's Get Started", description: "Ready to enter the AR world? Tap 'Start' to experience the magic.")
-        ]
-    }
+    let onboardingData: [(image: String, title: String, description: String)] = [
+        ("meditation1", "Welcome to AR Meditation", "Immerse yourself in a calming AR space for mindfulness and relaxation."),
+        ("meditation2", "How It Works", "Visualize floating meditation aids in your real space to guide your focus."),
+        ("meditation3", "Get Started", "Find a quiet place, start the session, and let AR guide you.")
+    ]
     
     var body: some View {
-        TabView {
-            ForEach(pages.indices, id: \.self) { index in
-                AROnboardingPageView(page: pages[index], isLastPage: index == pages.count - 1, onFinish: {
-                    hasCompletedAROnboarding = true
-                })
+        if hasSeenOnboarding {
+            ARExperienceView()
+        } else {
+            TabView(selection: $currentPage) {
+                ForEach(0..<onboardingData.count, id: \.self) { index in
+                    AROnboardingPageViewWrapper(
+                        data: onboardingData[index],
+                        isLastPage: index == onboardingData.count - 1,
+                        onSkip: { hasSeenOnboarding = true }
+                    )
+                    .tag(index)
+                }
             }
+            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .always))
         }
-        .tabViewStyle(PageTabViewStyle(indexDisplayMode: .automatic))
     }
 }
 
+import SwiftUI
+
 struct AROnboardingPageView: View {
-    let page: AROnboardingPage
-    let isLastPage: Bool
-    var onFinish: () -> Void
-    
+    var image: String
+    var title: String
+    var description: String
+    var isLastPage: Bool
+    var onSkip: () -> Void
+
     var body: some View {
         VStack {
-            Text(page.title)
+            Image(image)
+                .resizable()
+                .scaledToFit()
+                .frame(height: 200)
+                .padding()
+
+            Text(title)
                 .font(.title)
                 .bold()
                 .padding()
-            
-            Text(page.description)
+
+            Text(description)
                 .font(.subheadline)
                 .multilineTextAlignment(.center)
                 .padding()
-            
+
             if isLastPage {
-                Button(action: onFinish) {
-                    Text("Start AR Experience")
+                Button(action: onSkip) {
+                    Text("Get Started")
                         .font(.headline)
                         .padding()
                         .frame(maxWidth: .infinity)
@@ -64,8 +73,21 @@ struct AROnboardingPageView: View {
     }
 }
 
+struct AROnboardingPageViewWrapper: View {
+    var data: (image: String, title: String, description: String)
+    var isLastPage: Bool
+    var onSkip: () -> Void
 
-struct AROnboardingPage {
-    let title: String
-    let description: String
+    var body: some View {
+        AROnboardingPageView(
+            image: data.image,
+            title: data.title,
+            description: data.description,
+            isLastPage: isLastPage,
+            onSkip: onSkip
+        )
+    }
 }
+
+
+

@@ -131,7 +131,7 @@ struct ARExperienceView: View {
             if hasCompletedAROnboarding {
                 ARExperienceView()
             } else {
-                AROnboardingView(hasCompletedAROnboarding: $hasCompletedAROnboarding)
+                AROnboardingView()
             }
         }
         .onChange(of: hasCompletedAROnboarding) {
