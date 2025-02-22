@@ -15,6 +15,7 @@ struct MeditationView: View {
     @State private var timer: Timer?
     @State private var navigateToStatistics = false
     @State private var userFeeling: String = ""
+    @State private var goalsView = GoalsView()
 
     var body: some View {
         NavigationStack {
@@ -119,7 +120,7 @@ struct MeditationView: View {
                     EmptyView()
                 }
                 .navigationDestination(isPresented: $navigateToStatistics) {
-                    StatisticsView(meditationDuration: meditationDuration, userFeeling: userFeeling)
+                    ReflectionView(meditationDuration: meditationDuration)
                 }
             }
             .padding()
@@ -158,7 +159,8 @@ struct MeditationView: View {
     func stopMeditation() {
         timer?.invalidate()
         isMeditating = false
-        scale = 1.0  // Stop pulsating
+        scale = 1.0
+        goalsView.completeMeditationSession()
     }
 
     func playChimeSound() {

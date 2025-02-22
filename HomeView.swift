@@ -64,6 +64,13 @@ struct HomeView: View {
                         iconName: "pills",
                         destination: AnyView(MedicationListView())
                     )
+                    
+                    CardView(
+                        title: "Goals",
+                        description: "Set and track your health goals.",
+                        iconName: "target",
+                        destination: AnyView(GoalsView())
+                        )
 
                 }
                 .padding(.top)
