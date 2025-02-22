@@ -17,6 +17,9 @@ struct ContentView: View {
                     TabBarElement(tabBarElementItem: .init(title: "Home", systemImageName: "house.fill")) {
                         HomeView()
                     },
+                    TabBarElement(tabBarElementItem: .init(title: "Chat", systemImageName: "chat.fill")) {
+                        ChatbotView()
+                    },
                     TabBarElement(tabBarElementItem: .init(title: "Schedule", systemImageName: "calendar")) {
                         ScheduleView()
                     },
