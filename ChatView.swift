@@ -1,13 +1,10 @@
 import SwiftUI
 
-import SwiftUI
-
-
-
 struct ChatbotView: View {
     @State private var userMessage: String = ""
     @State private var messages: [(String, Bool)] = []
     @State private var navigateToMeditation: Bool = false
+    @State private var navigateToGoals: Bool = false
 
     var body: some View {
         NavigationStack {
@@ -45,6 +42,9 @@ struct ChatbotView: View {
                 NavigationLink(destination: MeditationView(), isActive: $navigateToMeditation) {
                     EmptyView()
                 }
+                NavigationLink(destination: GoalsView(), isActive: $navigateToGoals) {
+                    EmptyView()
+                }
             }
             .navigationTitle("Chat")
         }
@@ -71,22 +71,22 @@ struct ChatbotView: View {
             "I'm just a bot, but I'm here to help!": ["how are you"],
             "Goodbye! Have a great day!": ["goodbye"],
             "I can assist with meditation, breathing exercises, and relaxation tips.": ["help"],
-
-            // Meditation-related responses
             "Meditation is great for relaxation! Would you like to start a guided session?": ["meditate", "relax", "calm", "mindfulness", "zen", "peace", "tranquility"],
             "Starting a meditation session now... 🧘‍♂️": ["start meditation"],
             "Try this: Breathe in for 4 seconds, hold for 4 seconds, and exhale for 4 seconds. Repeat 5 times!": ["breathing"],
             "Feeling stressed? Try deep breathing and focus on the present moment.": ["stress relief"],
             "A 5-minute meditation session can help clear your mind!": ["focus"],
-            "A short guided meditation before bed can improve sleep quality. Would you like some tips?": ["sleep"]
+            "A short guided meditation before bed can improve sleep quality. Would you like some tips?": ["sleep"],
+            "Navigating to the goals page...": ["add goal"]
         ]
 
         for (response, keywords) in responses {
             for keyword in keywords {
                 if lowerMessage.contains(keyword) {
                     if keyword == "start meditation" {
-                        // Trigger Meditation Feature
                         navigateToMeditation = true
+                    } else if keyword == "add goal" {
+                        navigateToGoals = true
                     }
                     return response
                 }
@@ -96,6 +96,3 @@ struct ChatbotView: View {
         return "I'm not sure I understand. Can you try asking something else?"
     }
 }
-
-
-
