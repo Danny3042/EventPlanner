@@ -13,105 +13,123 @@ struct MeditationView: View {
     @State private var showPopover = false
     @State private var remainingTime: Int = 0
     @State private var timer: Timer?
+    @State private var navigateToStatistics = false
+    @State private var userFeeling: String = ""
 
     var body: some View {
-        VStack {
-            Spacer()
+        NavigationStack {
+            VStack {
+                Spacer()
 
-            // Pulsating Animation
-            Circle()
-                .fill(Color.blue.opacity(1))
-                .frame(width: 200, height: 200)
-                .scaleEffect(scale)
-                .animation(isMeditating ? .easeInOut(duration: 3).repeatForever(autoreverses: true) : .default, value: scale)
-                .onAppear {
-                    scale = 1.2  // Start pulsating
-                }
-
-            Spacer()
-
-            Text("Current duration: \(meditationDuration) minutes")
-                .padding()
-
-            if isMeditating {
-                Text("Remaining time: \(remainingTime) seconds")
-                    .padding()
-            }
-
-            Text(isMeditating ? "Breathe in... Breathe out..." : "Ready to Start")
-                .font(.headline)
-                .padding()
-
-            Spacer()
-
-            HStack {
-                if !isMeditating {
-                    Button(action: startMeditation) {
-                        Text("Start")
-                            .padding()
-                            .frame(width: 100, height: 100)
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .clipShape(Circle())
-                            .animation(.easeInOut, value: isMeditating)
+                // Pulsating Animation
+                Circle()
+                    .fill(Color.blue.opacity(1))
+                    .frame(width: 200, height: 200)
+                    .scaleEffect(scale)
+                    .animation(isMeditating ? .easeInOut(duration: 3).repeatForever(autoreverses: true) : .default, value: scale)
+                    .onAppear {
+                        scale = 1.2  // Start pulsating
                     }
+
+                Spacer()
+
+                Text("Current duration: \(meditationDuration) minutes")
                     .padding()
-                }
 
                 if isMeditating {
-                    Button(action: stopMeditation) {
-                        Text("Stop")
+                    Text("Remaining time: \(formattedRemainingTime)")
+                        .padding()
+                        .animation(.easeInOut, value: remainingTime)
+                }
+
+                Text(isMeditating ? "Breathe in... Breathe out..." : "Ready to Start")
+                    .font(.headline)
+                    .padding()
+
+                Spacer()
+
+                HStack {
+                    if !isMeditating {
+                        Button(action: startMeditation) {
+                            Text("Start")
+                                .padding()
+                                .frame(width: 100, height: 100)
+                                .background(Color.blue)
+                                .foregroundColor(.white)
+                                .clipShape(Circle())
+                                .animation(.easeInOut, value: isMeditating)
+                        }
+                        .padding()
+                    }
+
+                    if isMeditating {
+                        Button(action: stopMeditation) {
+                            Text("Stop")
+                                .padding()
+                                .frame(width: 100, height: 100)
+                                .background(Color.red)
+                                .foregroundColor(.white)
+                                .clipShape(Circle())
+                        }
+                        .padding()
+                    }
+
+                    Button(action: {
+                        showPopover = true
+                    }) {
+                        Text("Duration")
                             .padding()
                             .frame(width: 100, height: 100)
-                            .background(Color.red)
+                            .background(Color.green)
                             .foregroundColor(.white)
                             .clipShape(Circle())
                     }
                     .padding()
-                }
-
-                Button(action: {
-                    showPopover = true
-                }) {
-                    Text("Duration")
-                        .padding()
-                        .frame(width: 100, height: 100)
-                        .background(Color.green)
-                        .foregroundColor(.white)
-                        .clipShape(Circle())
-                }
-                .padding()
-                .popover(isPresented: $showPopover) {
-                    VStack {
-                        Text("Select Duration")
-                            .font(.headline)
+                    .popover(isPresented: $showPopover) {
+                        VStack {
+                            Text("Select Duration")
+                                .font(.headline)
+                                .padding()
+                            Stepper(value: $meditationDuration, in: 1...30, step: 5) {
+                                Text("\(meditationDuration) minutes")
+                            }
                             .padding()
-                        Stepper(value: $meditationDuration, in: 1...30, step: 5) {
-                            Text("\(meditationDuration) minutes")
-                        }
-                        .padding()
-                        Button("Done") {
-                            showPopover = false
+                            Button("Done") {
+                                showPopover = false
+                            }
+                            .padding()
                         }
                         .padding()
                     }
-                    .padding()
+
+                    if isChimePlaying {
+                        Button(action: stopChimeSound) {
+                            Text("Stop")
+                                .padding()
+                                .frame(width: 100, height: 100)
+                                .background(Color.red)
+                                .foregroundColor(.white)
+                                .clipShape(Circle())
+                        }
+                        .padding()
+                    }
                 }
 
-                if isChimePlaying {
-                    Button(action: stopChimeSound) {
-                        Text("Stop")
-                            .padding()
-                            .frame(width: 100, height: 100)
-                            .background(Color.red)
-                            .foregroundColor(.white)
-                            .clipShape(Circle())
-                    }
-                    .padding()
+                NavigationLink(value: navigateToStatistics) {
+                    EmptyView()
+                }
+                .navigationDestination(isPresented: $navigateToStatistics) {
+                    StatisticsView(meditationDuration: meditationDuration, userFeeling: userFeeling)
                 }
             }
+            .padding()
         }
-        .padding()
+    }
+
+    var formattedRemainingTime: String {
+        let minutes = remainingTime / 60
+        let seconds = remainingTime % 60
+        return String(format: "%02d:%02d", minutes, seconds)
     }
 
     func startMeditation() {
@@ -126,10 +144,13 @@ struct MeditationView: View {
         // Start the timer
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
             if remainingTime > 0 {
-                remainingTime -= 1
+                withAnimation {
+                    remainingTime -= 1
+                }
             } else {
                 stopMeditation()
                 playChimeSound()
+                navigateToStatistics = true
             }
         }
     }
