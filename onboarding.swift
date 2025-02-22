@@ -30,8 +30,23 @@ struct OnboardingView: View {
                         .padding()
                         .background(Color.gray.opacity(0.2))
                         .clipShape(Circle())
+                        .foregroundColor(Color.blue)
                 }
                 .disabled(currentPage == 0)
+
+                Spacer()
+
+                Button(action: {
+                    // Skip the onboarding and navigate to the home page
+                    UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
+                    NotificationCenter.default.post(name: .onboardingCompleted, object: nil)
+                }) {
+                    Text("Skip")
+                        .padding()
+                        .background(Color.gray.opacity(0.2))
+                        .cornerRadius(10)
+                        .foregroundColor(Color.blue)
+                }
 
                 Spacer()
 
@@ -44,6 +59,7 @@ struct OnboardingView: View {
                         .padding()
                         .background(Color.gray.opacity(0.2))
                         .clipShape(Circle())
+                        .foregroundColor(Color.blue)
                 }
                 .disabled(currentPage == pages.count - 1)
             }
