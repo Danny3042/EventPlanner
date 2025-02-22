@@ -91,7 +91,7 @@ struct ARMeditationView: View {
     @State private var showCompletionAlert = false
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 Text("AR Experience")
                     .font(.largeTitle)

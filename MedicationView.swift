@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct MedicationListView: View {
-    @State private var medications = [("Medication 1", "Dosage 1"), ("Medication 2", "Dosage 2"), ("Medication 3", "Dosage 3")]
+    @State private var medications = [("Aspirin", "100 mg"), ("Ibuprofen", "200 mg"), ("Paracetamol", "500 mg")]
+    @State private var showAddMedicationSheet = false
 
     var body: some View {
         VStack {
@@ -22,7 +23,9 @@ struct MedicationListView: View {
             }
             .listStyle(PlainListStyle())
 
-            Button(action: addMedication) {
+            Button(action: {
+                showAddMedicationSheet = true
+            }) {
                 Text("Add Medication")
                     .font(.headline)
                     .padding()
@@ -31,11 +34,36 @@ struct MedicationListView: View {
                     .cornerRadius(10)
             }
             .padding()
+            .sheet(isPresented: $showAddMedicationSheet) {
+                AddMedicationView { name, dosage in
+                    medications.append((name, dosage))
+                    showAddMedicationSheet = false
+                }
+            }
         }
     }
+}
 
-    private func addMedication() {
-        medications.append(("New Medication", "New Dosage"))
+struct AddMedicationView: View {
+    @State private var name = ""
+    @State private var dosage = ""
+    var onAdd: (String, String) -> Void
+
+    var body: some View {
+        NavigationView {
+            Form {
+                Section(header: Text("Medication Details")) {
+                    TextField("Name", text: $name)
+                    TextField("Dosage", text: $dosage)
+                }
+            }
+            .navigationBarTitle("Add Medication", displayMode: .inline)
+            .navigationBarItems(leading: Button("Cancel") {
+                onAdd("", "")
+            }, trailing: Button("Add") {
+                onAdd(name, dosage)
+            })
+        }
     }
 }
 
