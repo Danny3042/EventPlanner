@@ -48,7 +48,7 @@ struct HomeView: View {
                         title: "Access AR",
                         description: "Tap here to access AR and start popping bubbles.",
                         iconName: "arkit",
-                        destination: AnyView(ARViewRepresentable(isFullScreen: .constant(true)))
+                        destination: AnyView(ARMeditationView())
                     )
 
                     CardView(
